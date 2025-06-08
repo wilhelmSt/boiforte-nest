@@ -1,0 +1,207 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("USER") // ADMIN, USER
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Fornecedor {
+  id            Int       @id @default(autoincrement())
+  nome          String
+  cnpj          String?
+  telefone      String?
+  email         String?
+  endereco      String?
+  observacao    String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  lote          Lote[]
+}
+
+model CategoriaProduto {
+  id            Int           @id @default(autoincrement())
+  nome          String        @unique
+  descricao     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  tipoProduto   TipoProduto   @relation(fields: [tipoProdutoid], references: [id])
+  tipoProdutoid Int
+
+  produtos      Produto[]
+}
+
+model TipoProduto {
+  id                Int       @id @default(autoincrement())
+  nome              String    @unique
+  descricao         String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  CategoriaProduto  CategoriaProduto[]
+}
+
+model Produto {
+  id                    Int               @id @default(autoincrement())
+  nome                  String
+  codigo                String?           @unique 
+  descricao             String?
+  precoPadrao           Float
+  estoqueMinimo         Float             @default(0)
+  estoque               Float             @default(0)
+  unidadeMedida         String            @default("und")
+  promocao              Boolean           @default(false)
+  precoPromocional      Float?
+  descontoAtacado       Boolean           @default(false)
+  precoAtacado          Float?
+  quantidadeAtacado     Float?
+  imagem                String?  
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  categoria             CategoriaProduto  @relation(fields: [categoriaId], references: [id])
+  categoriaId           Int
+
+  itemCompra            ItemCompra[]
+  itemCompraRecorrente  ItemCompraRecorrente[]
+  lote                  Lote[]
+}
+
+model Lote {
+  id            Int         @id @default(autoincrement())
+  quantidade    Float       @default(1)
+  custoUnitario Float
+  custoTotal    Float
+  vencimento    DateTime
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  produto       Produto     @relation(fields: [produtoId], references: [id])
+  produtoId     Int
+  fornecedor    Fornecedor  @relation(fields: [fornecedorId], references: [id])
+  fornecedorId  Int
+}
+
+model Cliente {
+  id                Int       @id @default(autoincrement())
+  nome              String
+  cpfCnpj           String?
+  telefone          String?
+  email             String?
+  endereco          String?
+  observacao        String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  Compra            Compra[]
+  CompraRecorrente  CompraRecorrente[]
+}
+
+model Compra {
+  id                Int       @id @default(autoincrement())
+  tipoPagamento     String    @default("DINHEIRO") // DINHEIRO, CARTAO, PIX, BOLETO
+  condicaoPagamento String    @default("A_VISTA") // A_VISTA, PARCELADO
+  status            String    // PAGO, ENTREGUE, CANCELADO
+  valorTotal        Float
+  valorTotalFinal   Float
+  desconto          Float     @default(0)
+  descontoFinal     Float     @default(0)
+  observacao        String?
+  nfeNumero         String?
+  nfeChave          String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  cliente           Cliente   @relation(fields: [clienteId], references: [id])
+  clienteId         Int
+
+  itens             ItemCompra[]
+}
+
+model ItemCompra {
+  id            Int       @id @default(autoincrement())
+  quantidade    Float
+  preco         Float
+  desconto      Float     @default(0)
+  total         Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  compra        Compra    @relation(fields: [compraId], references: [id])
+  compraId      Int
+  produto       Produto   @relation(fields: [produtoId], references: [id])
+  produtoId     Int
+}
+
+model CompraRecorrente {
+  id                Int       @id @default(autoincrement())
+  tipoPagamento     String    @default("DINHEIRO") // DINHEIRO, CARTAO, PIX, BOLETO
+  condicaoPagamento String    @default("A_VISTA") // A_VISTA, PARCELADO
+  valorTotal        Float
+  valorTotalFinal   Float
+  desconto          Float     @default(0)
+  descontoFinal     Float     @default(0)
+  observacao        String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  cliente           Cliente   @relation(fields: [clienteId], references: [id])
+  clienteId         Int
+
+  itens             ItemCompraRecorrente[]
+}
+
+model ItemCompraRecorrente {
+  id                  Int               @id @default(autoincrement())
+  quantidade          Float
+  preco               Float
+  desconto            Float             @default(0)
+  total               Float
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  compraRecorrente    CompraRecorrente  @relation(fields: [compraRecorrenteId], references: [id])
+  compraRecorrenteId  Int
+  produto             Produto           @relation(fields: [produtoId], references: [id])
+  produtoId           Int
+}
+
+model Logs {
+  id          Int       @id @default(autoincrement())
+  categoria   String?
+  tipo        String?
+  descricao   String?
+  request     String?
+  response    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Configuracao {
+  id        Int       @id @default(autoincrement())
+  chave     String    @unique
+  valor     String
+  descricao String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
