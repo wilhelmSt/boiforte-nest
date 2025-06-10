@@ -8,9 +8,10 @@ import { UserModule } from './user/user.module';
 import { FornecedorController } from './fornecedor/fornecedor.controller';
 import { FornecedorService } from './fornecedor/fornecedor.service';
 import { FornecedorModule } from './fornecedor/fornecedor.module';
+import { TipoProdutoModule } from './tipo-produto/tipo-produto.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule],
+  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule],
   controllers: [AppController, FornecedorController],
   providers: [AppService, UserService, FornecedorService],
 })
