@@ -19,9 +19,23 @@ import { LoteModule } from './lote/lote.module';
 import { ClienteModule } from './cliente/cliente.module';
 import { CompraModule } from './compra/compra.module';
 import { CompraRecorrenteModule } from './compra-recorrente/compra-recorrente.module';
+import { LogsModule } from './logs-db/logs.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule, LoteModule, ClienteModule, CompraModule, CompraRecorrenteModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    UserModule,
+    FornecedorModule,
+    TipoProdutoModule,
+    CategoriaProdutoModule,
+    ProdutoModule,
+    LoteModule,
+    ClienteModule,
+    CompraModule,
+    CompraRecorrenteModule,
+    LogsModule,
+  ],
   controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
 })
