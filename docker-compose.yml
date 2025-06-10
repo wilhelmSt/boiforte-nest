@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:18-alpine
+    image: postgres:16
     container_name: boi_forte_db
     environment:
       POSTGRES_USER: ${DB_USER}
@@ -28,9 +28,7 @@ services:
       - '${PORT}:${PORT}'
     environment:
       DATABASE_URL: ${DATABASE_URL}
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+  
     networks:
       - boi-forte-network
     restart: unless-stopped
