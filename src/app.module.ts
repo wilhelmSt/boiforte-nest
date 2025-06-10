@@ -12,9 +12,10 @@ import { TipoProdutoModule } from './tipo-produto/tipo-produto.module';
 import { CategoriaProdutoService } from './categoria-produto/categoria-produto.service';
 import { CategoriaProdutoController } from './categoria-produto/categoria-produto.controller';
 import { CategoriaProdutoModule } from './categoria-produto/categoria-produto.module';
+import { ProdutoModule } from './produto/produto.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule],
+  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule],
   controllers: [AppController, FornecedorController, CategoriaProdutoController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService],
 })
