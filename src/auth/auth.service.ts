@@ -2,7 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { PrismaClient } from '@prisma/client';
+import { Prisma } from 'generated/prisma';
+
+type User = Prisma.UserGetPayload<object>;
 
 @Injectable()
 export class AuthService {
@@ -11,17 +13,18 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateClient(email: string, password: string): Promise<Omit<PrismaClient, 'password'> | null> {
-    const client = await this.prisma.client.findUnique({ where: { email } });
+  async validateClient(email: string, password: string): Promise<Omit<User, 'password'> | null> {
+    const client = await this.prisma.user.findUnique({ where: { email } });
 
     if (client && (await bcrypt.compare(password, client.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = client;
       return result;
     }
     return null;
   }
 
-  async login(client: PrismaClient) {
+  async login(client: User) {
     const payload = {
       email: client.email,
       sub: client.id,
@@ -42,16 +45,16 @@ export class AuthService {
   async getClientFromToken(token: string) {
     try {
       const payload = this.jwtService.verify(token.replace('Bearer ', ''));
-      return await this.prisma.client.findUnique({
+      return await this.prisma.user.findUnique({
         where: { id: payload.sub },
         select: {
           id: true,
           name: true,
           email: true,
           role: true,
-          // Adicione outros campos necessários
         },
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       return null;
     }
