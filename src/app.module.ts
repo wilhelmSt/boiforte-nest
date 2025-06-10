@@ -13,10 +13,13 @@ import { CategoriaProdutoService } from './categoria-produto/categoria-produto.s
 import { CategoriaProdutoController } from './categoria-produto/categoria-produto.controller';
 import { CategoriaProdutoModule } from './categoria-produto/categoria-produto.module';
 import { ProdutoModule } from './produto/produto.module';
+import { LoteService } from './lote/lote.service';
+import { LoteController } from './lote/lote.controller';
+import { LoteModule } from './lote/lote.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule],
-  controllers: [AppController, FornecedorController, CategoriaProdutoController],
-  providers: [AppService, UserService, FornecedorService, CategoriaProdutoService],
+  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule, LoteModule],
+  controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
+  providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
 })
 export class AppModule {}
