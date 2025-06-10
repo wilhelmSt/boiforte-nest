@@ -21,6 +21,7 @@ import { CompraModule } from './compra/compra.module';
 import { CompraRecorrenteModule } from './compra-recorrente/compra-recorrente.module';
 import { LogsModule } from './logs-db/logs.module';
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
+import { ItemCompraModule } from './item-compra/item-compra.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ConfiguracaoModule } from './configuracao/configuracao.module';
     CompraRecorrenteModule,
     LogsModule,
     ConfiguracaoModule,
+    ItemCompraModule,
   ],
   controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
