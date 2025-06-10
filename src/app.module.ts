@@ -20,6 +20,7 @@ import { ClienteModule } from './cliente/cliente.module';
 import { CompraModule } from './compra/compra.module';
 import { CompraRecorrenteModule } from './compra-recorrente/compra-recorrente.module';
 import { LogsModule } from './logs-db/logs.module';
+import { ConfiguracaoModule } from './configuracao/configuracao.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { LogsModule } from './logs-db/logs.module';
     CompraModule,
     CompraRecorrenteModule,
     LogsModule,
+    ConfiguracaoModule,
   ],
   controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
