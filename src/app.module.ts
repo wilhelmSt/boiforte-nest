@@ -16,9 +16,10 @@ import { ProdutoModule } from './produto/produto.module';
 import { LoteService } from './lote/lote.service';
 import { LoteController } from './lote/lote.controller';
 import { LoteModule } from './lote/lote.module';
+import { ClienteModule } from './cliente/cliente.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule, LoteModule],
+  imports: [PrismaModule, AuthModule, UserModule, FornecedorModule, TipoProdutoModule, CategoriaProdutoModule, ProdutoModule, LoteModule, ClienteModule],
   controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
 })
