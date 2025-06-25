@@ -26,25 +26,24 @@ services:
         condition: service_healthy
     ports:
       - '${PORT}:${PORT}'
+      - '${PRISMA_PORT}:${PRISMA_PORT}'
     environment:
       DATABASE_URL: ${DATABASE_URL}
-  
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     networks:
       - boi-forte-network
     restart: unless-stopped
-
-  prisma-studio:
-    image: node:18
-    depends_on:
-      - postgres
-    working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
-    command: npx prisma studio
-    ports:
-      - '${PRISMA_PORT}:${PRISMA_PORT}'
-    environment:
-      DATABASE_URL:
+      - /usr/src/app/node_modules
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:${PORT}/api/health || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: npm run docker:dev
 
 volumes:
   postgres_data:
