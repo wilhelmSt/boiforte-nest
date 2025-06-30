@@ -45,6 +45,10 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## API Documentation
+
+After starting the application, Swagger UI is available at [`http://localhost:3000/api`](http://localhost:3000/api).
+
 ## Run tests
 
 ```bash
