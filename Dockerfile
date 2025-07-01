@@ -9,6 +9,7 @@ COPY . .
 RUN npm install
 
 RUN npx prisma generate
+RUN npx prisma migrate 
 
 EXPOSE 3000
 CMD ["npm", "run", "docker:dev"]
