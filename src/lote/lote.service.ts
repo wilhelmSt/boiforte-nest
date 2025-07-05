@@ -19,7 +19,15 @@ export class LoteService {
       fornecedor: { connect: { id: fornecedorId } },
     };
 
-    return this.prisma.lote.create({ data });
+    const lote = await this.prisma.lote.create({ data });
+
+    // Atualiza o estoque do produto relacionado
+    await this.prisma.produto.update({
+      where: { id: produtoId },
+      data: { estoque: { increment: quantidade } },
+    });
+
+    return lote;
   }
 
   async findAll(): Promise<Lote[]> {
