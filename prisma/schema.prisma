@@ -24,15 +24,17 @@ model User {
 }
 
 model Fornecedor {
-  id            Int       @id @default(autoincrement())
-  nome          String
-  cnpj          String?
-  telefone      String?
-  email         String?
-  endereco      String?
-  observacao    String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  nome              String
+  cnpj              String?
+  telefone          String?
+  email             String?
+  endereco          String?
+  observacao        String?
+  quantidade_lotes  Int?      // Quantos lotes já foi comprado com esse fornecedor.
+  ultima_entrada    DateTime? // Atualiza quando um novo lote desse fornecedor é adicionado.
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   lote          Lote[]
 }
