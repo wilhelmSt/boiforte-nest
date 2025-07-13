@@ -61,22 +61,74 @@ export class FornecedorService {
     return { message: `Fornecedor com ID ${id} removido com sucesso.` };
   }
 
-  async search(query: string): Promise<Fornecedor[]> {
-    if (!query?.trim()) {
-      return [];
-    }
+  async search(
+    query: string,
+    page: number,
+    limit: number,
+    orderBy: string,
+    orderDirection: 'asc' | 'desc'
+  ): Promise<{ data: Fornecedor[]; total: number; pages: number }> {
+    const validOrderFields = ['nome', 'endereco', 'telefone', 'ultima_entrada', 'quantidade_lotes'];
+    const sortField = validOrderFields.includes(orderBy) ? orderBy : 'nome';
 
-    return this.prisma.fornecedor.findMany({
+    const whereCondition: Prisma.FornecedorWhereInput = query?.trim()
+      ? {
+          OR: [
+            { nome: { contains: query, mode: 'insensitive' } },
+            { cnpj: { contains: query } },
+            { telefone: { contains: query } },
+            { email: { contains: query, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
+    const [fornecedores, total] = await Promise.all([
+      this.prisma.fornecedor.findMany({
+        where: whereCondition,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          [sortField]: orderDirection,
+        },
+      }),
+      this.prisma.fornecedor.count({ where: whereCondition }),
+    ]);
+
+    return {
+      data: fornecedores,
+      total,
+      pages: Math.ceil(total / limit),
+    };
+  }
+
+  async getTopFornecedores(): Promise<Fornecedor[]> {
+    return await this.prisma.fornecedor.findMany({
       where: {
-        OR: [
-          { nome: { contains: query, mode: 'insensitive' } },
-          { cnpj: { contains: query } },
-          { email: { contains: query, mode: 'insensitive' } },
-        ],
+        quantidade_lotes: {
+          gte: 1,
+          not: null,
+        },
       },
+      take: 3,
       orderBy: {
-        nome: 'asc',
+        quantidade_lotes: 'desc',
       },
     });
+  }
+
+  async getFornecedoresAtivos(): Promise<{ fornecedoresAtivos: number }> {
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    const quantity = await this.prisma.fornecedor.count({
+      where: {
+        ultima_entrada: {
+          gte: twoMonthsAgo,
+          not: null,
+        },
+      },
+    });
+
+    return { fornecedoresAtivos: quantity };
   }
 }
