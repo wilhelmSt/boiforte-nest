@@ -47,4 +47,109 @@ export class ClienteService {
     await this.prisma.cliente.delete({ where: { id } });
     return { message: `Cliente com ID ${id} removido com sucesso.` };
   }
+
+  async search(
+    query: string,
+    page: number = 1,
+    limit: number = 10,
+    orderBy: string = 'nome',
+    orderDirection: 'asc' | 'desc' = 'asc',
+    filters?: {
+      minPedidos?: number;
+      maxPedidos?: number;
+      dataInicio?: Date;
+      dataFim?: Date;
+    }
+  ): Promise<{ data: Cliente[]; total: number; pages: number }> {
+    const validOrderFields = ['nome', 'endereco', 'telefone', 'ultimo_pedido', 'quantidade_pedidos'];
+    const sortField = validOrderFields.includes(orderBy) ? orderBy : 'nome';
+
+    const whereCondition: Prisma.ClienteWhereInput = {
+      AND: [
+        query?.trim()
+          ? {
+              OR: [
+                { nome: { contains: query, mode: 'insensitive' } },
+                { cpfCnpj: { contains: query } },
+                { telefone: { contains: query } },
+                { email: { contains: query, mode: 'insensitive' } },
+                { endereco: { contains: query, mode: 'insensitive' } },
+              ],
+            }
+          : {},
+        filters?.minPedidos ? { quantidade_pedidos: { gte: filters.minPedidos } } : {},
+        filters?.maxPedidos ? { quantidade_pedidos: { lte: filters.maxPedidos } } : {},
+        filters?.dataInicio ? { createdAt: { gte: filters.dataInicio } } : {},
+        filters?.dataFim ? { createdAt: { lte: filters.dataFim } } : {},
+      ],
+    };
+
+    const [clientes, total] = await Promise.all([
+      this.prisma.cliente.findMany({
+        where: whereCondition,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          [sortField]: orderDirection,
+        },
+        include: {
+          Compra: false,
+          CompraRecorrente: false,
+        },
+      }),
+      this.prisma.cliente.count({ where: whereCondition }),
+    ]);
+
+    return {
+      data: clientes,
+      total,
+      pages: Math.ceil(total / limit),
+    };
+  }
+
+  async getTopClientes(): Promise<Cliente[]> {
+    const withPedidos = await this.prisma.cliente.findMany({
+      where: {
+        quantidade_pedidos: {
+          gte: 1,
+        },
+      },
+      take: 3,
+      orderBy: {
+        quantidade_pedidos: 'desc',
+      },
+    });
+
+    if (withPedidos.length < 3) {
+      const restantes = 3 - withPedidos.length;
+      const withoutPedidos = await this.prisma.cliente.findMany({
+        where: {
+          quantidade_pedidos: null,
+        },
+        take: restantes,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      return [...withPedidos, ...withoutPedidos];
+    }
+
+    return withPedidos;
+  }
+
+  async getClientesAtivos(): Promise<{ clientesAtivos: number }> {
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    const quantity = await this.prisma.cliente.count({
+      where: {
+        ultimo_pedido: {
+          gte: twoMonthsAgo,
+          not: null,
+        },
+      },
+    });
+
+    return { clientesAtivos: quantity };
+  }
 }

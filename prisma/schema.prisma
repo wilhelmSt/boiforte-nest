@@ -104,15 +104,17 @@ model Lote {
 }
 
 model Cliente {
-  id                Int       @id @default(autoincrement())
-  nome              String
-  cpfCnpj           String?
-  telefone          String?
-  email             String?
-  endereco          String?
-  observacao        String?
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                  Int       @id @default(autoincrement())
+  nome                String
+  cpfCnpj             String?
+  telefone            String?
+  email               String?
+  endereco            String?
+  observacao          String?
+  quantidade_pedidos  Int?
+  ultimo_pedido       DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
   Compra            Compra[]
   CompraRecorrente  CompraRecorrente[]

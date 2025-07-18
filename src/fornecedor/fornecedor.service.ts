@@ -102,11 +102,10 @@ export class FornecedorService {
   }
 
   async getTopFornecedores(): Promise<Fornecedor[]> {
-    return await this.prisma.fornecedor.findMany({
+    const withLotes = await this.prisma.fornecedor.findMany({
       where: {
         quantidade_lotes: {
           gte: 1,
-          not: null,
         },
       },
       take: 3,
@@ -114,6 +113,22 @@ export class FornecedorService {
         quantidade_lotes: 'desc',
       },
     });
+
+    if (withLotes.length < 3) {
+      const restantes = 3 - withLotes.length;
+      const withoutLotes = await this.prisma.fornecedor.findMany({
+        where: {
+          quantidade_lotes: null,
+        },
+        take: restantes,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+      return [...withLotes, ...withoutLotes];
+    }
+
+    return withLotes;
   }
 
   async getFornecedoresAtivos(): Promise<{ fornecedoresAtivos: number }> {

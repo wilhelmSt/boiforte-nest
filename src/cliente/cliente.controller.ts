@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { ClienteService } from './cliente.service';
 import { CreateClienteDto, UpdateClienteDto } from './cliente.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -13,6 +13,33 @@ export class ClienteController {
   @ApiResponse({ status: 201, description: 'Cliente criado com sucesso' })
   create(@Body() createClienteDto: CreateClienteDto) {
     return this.clienteService.create(createClienteDto);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Listar clientes com filtro' })
+  @ApiResponse({ status: 200, description: 'Lista clientes com filtro' })
+  search(
+    @Query('q') query: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('orderBy') orderBy = 'nome',
+    @Query('orderDirection') orderDirection: 'asc' | 'desc' = 'asc'
+  ) {
+    return this.clienteService.search(query, +page, +limit, orderBy, orderDirection);
+  }
+
+  @Get('top-clientes')
+  @ApiOperation({ summary: 'Obtém os top 3 clientes com mais compras' })
+  @ApiResponse({ status: 200, description: 'Os top 3 clientes com mais compras' })
+  getTopClientes() {
+    return this.clienteService.getTopClientes();
+  }
+
+  @Get('clientes-ativos')
+  @ApiOperation({ summary: 'Obtém a quantidade de clientes ativos' })
+  @ApiResponse({ status: 200, description: 'Clientes ativos' })
+  async getFornecedoresAtivos() {
+    return this.clienteService.getClientesAtivos();
   }
 
   @Get()
