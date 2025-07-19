@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateFornecedorDto, UpdateFornecedorDto } from './fornecedor.dto';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
 
 type Fornecedor = Prisma.FornecedorGetPayload<object>;
 

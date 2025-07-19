@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProdutoDto, UpdateProdutoDto } from './produto.dto';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
 
 type Produto = Prisma.ProdutoGetPayload<object>;
 
@@ -24,7 +24,7 @@ export class ProdutoService {
       precoAtacado: createProdutoDto?.precoAtacado,
       quantidadeAtacado: createProdutoDto?.quantidadeAtacado,
       imagem: createProdutoDto?.imagem,
-      categoria: {
+      corte: {
         connect: { id: createProdutoDto.categoriaId },
       },
     };

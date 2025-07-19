@@ -8,10 +8,10 @@ import { UserModule } from './user/user.module';
 import { FornecedorController } from './fornecedor/fornecedor.controller';
 import { FornecedorService } from './fornecedor/fornecedor.service';
 import { FornecedorModule } from './fornecedor/fornecedor.module';
-import { TipoProdutoModule } from './tipo-produto/tipo-produto.module';
-import { CategoriaProdutoService } from './categoria-produto/categoria-produto.service';
-import { CategoriaProdutoController } from './categoria-produto/categoria-produto.controller';
-import { CategoriaProdutoModule } from './categoria-produto/categoria-produto.module';
+import { EspecieProdutoModule } from './especie-produto/especie-produto.module';
+import { CorteProdutoService } from './corte-produto/corte-produto.service';
+import { CorteProdutoController } from './corte-produto/corte-produto.controller';
+import { CategoriaProdutoModule } from './corte-produto/corte-produto.module';
 import { ProdutoModule } from './produto/produto.module';
 import { LoteService } from './lote/lote.service';
 import { LoteController } from './lote/lote.controller';
@@ -30,7 +30,7 @@ import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra
     AuthModule,
     UserModule,
     FornecedorModule,
-    TipoProdutoModule,
+    EspecieProdutoModule,
     CategoriaProdutoModule,
     ProdutoModule,
     LoteModule,
@@ -42,7 +42,7 @@ import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra
     ItemCompraModule,
     ItemCompraRecorrenteModule,
   ],
-  controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
-  providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
+  controllers: [AppController, FornecedorController, CorteProdutoController, LoteController],
+  providers: [AppService, UserService, FornecedorService, CorteProdutoService, LoteService],
 })
 export class AppModule {}

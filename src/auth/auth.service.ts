@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from 'generated/prisma';
+import { Prisma } from '@prisma/client';
 
 type User = Prisma.UserGetPayload<object>;
 
