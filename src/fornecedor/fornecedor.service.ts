@@ -135,15 +135,28 @@ export class FornecedorService {
     const twoMonthsAgo = new Date();
     twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
 
-    const quantity = await this.prisma.fornecedor.count({
+    const quantity = await this.prisma.fornecedor.count(this.getFornecedoresAtivosSelect());
+
+    return { fornecedoresAtivos: quantity };
+  }
+
+  async getFornecedoresValidos(): Promise<{ fornecedoresValidos: Fornecedor[] }> {
+    const fornecedores = await this.prisma.fornecedor.findMany(this.getFornecedoresAtivosSelect());
+
+    return { fornecedoresValidos: fornecedores };
+  }
+
+  getFornecedoresAtivosSelect() {
+    const twoMonthsAgo = new Date();
+    twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+
+    return {
       where: {
         ultima_entrada: {
           gte: twoMonthsAgo,
           not: null,
         },
       },
-    });
-
-    return { fornecedoresAtivos: quantity };
+    };
   }
 }

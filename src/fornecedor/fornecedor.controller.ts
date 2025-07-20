@@ -65,6 +65,13 @@ export class FornecedorController {
     return this.fornecedoresService.getFornecedoresAtivos();
   }
 
+  @Get('fornecedores-validos')
+  @ApiOperation({ summary: 'Obtém os dados de fornecedores ativos para cadastro de lote' })
+  @ApiResponse({ status: 200, description: 'Fornecedores ativos' })
+  async getFornecedoresValidos() {
+    return this.fornecedoresService.getFornecedoresValidos();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtém um fornecedor pelo ID' })
   @ApiResponse({ status: 404, description: 'Fornecedor não encontrado' })
