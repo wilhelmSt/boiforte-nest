@@ -7,11 +7,27 @@ import { Prisma, Lote } from '@prisma/client';
 export class LoteService {
   constructor(private prisma: PrismaService) {}
 
+  async findProductsByCorteId(corteId: number): Promise<{ id: number }> {
+    return this.prisma.produto.findFirst({
+      where: {
+        corteId: corteId,
+      },
+      select: {
+        id: true,
+      },
+    });
+  }
+
   async create(createLoteDto: CreateLoteDto): Promise<Lote> {
-    const { produtoId, fornecedorId, quantidade = 1, vencimento } = createLoteDto;
+    const { corteId, fornecedorId, descricao, quantidade = 1, vencimento, custoUnitario, custoTotal } = createLoteDto;
+
+    const produtoId = (await this.findProductsByCorteId(corteId))?.id;
 
     const data: Prisma.LoteCreateInput = {
       quantidade,
+      descricao,
+      custoUnitario,
+      custoTotal,
       vencimento: new Date(vencimento),
       produto: { connect: { id: produtoId } },
       fornecedor: { connect: { id: fornecedorId } },
@@ -50,10 +66,12 @@ export class LoteService {
   async update(id: number, updateLoteDto: UpdateLoteDto): Promise<Lote> {
     await this.findOne(id);
 
+    const produtoId = (await this.findProductsByCorteId(updateLoteDto.corteId))?.id;
+
     const data: Prisma.LoteUpdateInput = {
       ...updateLoteDto,
       vencimento: updateLoteDto.vencimento ? new Date(updateLoteDto.vencimento) : undefined,
-      produto: updateLoteDto.produtoId ? { connect: { id: updateLoteDto.produtoId } } : undefined,
+      produto: produtoId ? { connect: { id: produtoId } } : undefined,
       fornecedor: updateLoteDto.fornecedorId ? { connect: { id: updateLoteDto.fornecedorId } } : undefined,
     };
 
