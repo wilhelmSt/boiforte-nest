@@ -8,7 +8,7 @@ export class LoteService {
   constructor(private prisma: PrismaService) {}
 
   async findProductsByCorteId(corteId: number): Promise<{ id: number }> {
-    return this.prisma.produto.findFirst({
+    const product = await this.prisma.produto.findFirst({
       where: {
         corteId: corteId,
       },
@@ -16,6 +16,12 @@ export class LoteService {
         id: true,
       },
     });
+
+    if (!product) {
+      throw new NotFoundException(`Produto associado com Corte de ID ${corteId} não encontrado`);
+    }
+
+    return product;
   }
 
   async create(createLoteDto: CreateLoteDto): Promise<Lote> {
