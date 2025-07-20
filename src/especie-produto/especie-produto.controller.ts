@@ -21,6 +21,12 @@ export class EspecieProdutoController {
     return this.service.findAll();
   }
 
+  @Get('cortes')
+  @ApiOperation({ summary: 'Lista todos as espécies de produto com os cortes' })
+  findAllWithCortes() {
+    return this.service.findAllWithCorte();
+  }
+
   @Get('search')
   @ApiOperation({ summary: 'Busca espécies de produto por termo' })
   search(

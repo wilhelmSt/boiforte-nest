@@ -3,8 +3,8 @@ import { CorteProdutoService } from './corte-produto.service';
 import { CreateCorteProdutoDto, UpdateCorteProdutoDto } from './corte-produto.dto';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@ApiTags('categoria-produto')
-@Controller('categoria-produto')
+@ApiTags('corte-produto')
+@Controller('corte-produto')
 export class CorteProdutoController {
   constructor(private readonly service: CorteProdutoService) {}
 

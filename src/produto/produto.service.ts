@@ -11,7 +11,6 @@ export class ProdutoService {
 
   async create(createProdutoDto: CreateProdutoDto): Promise<Produto> {
     const data: Prisma.ProdutoCreateInput = {
-      nome: createProdutoDto?.nome,
       codigo: createProdutoDto?.codigo,
       descricao: createProdutoDto?.descricao,
       precoPadrao: createProdutoDto?.precoPadrao,
@@ -25,7 +24,7 @@ export class ProdutoService {
       quantidadeAtacado: createProdutoDto?.quantidadeAtacado,
       imagem: createProdutoDto?.imagem,
       corte: {
-        connect: { id: createProdutoDto.categoriaId },
+        connect: { id: createProdutoDto.corteId },
       },
     };
 
@@ -34,7 +33,7 @@ export class ProdutoService {
 
   async findAll(): Promise<Produto[]> {
     return this.prisma.produto.findMany({
-      orderBy: { nome: 'asc' },
+      orderBy: { id: 'asc' },
     });
   }
 
@@ -50,13 +49,13 @@ export class ProdutoService {
 
   async update(id: number, updateProdutoDto: UpdateProdutoDto): Promise<Produto> {
     await this.findOne(id);
-    const { categoriaId, ...rest } = updateProdutoDto;
+    const { corteId, ...rest } = updateProdutoDto;
 
     return this.prisma.produto.update({
       where: { id },
       data: {
         ...rest,
-        ...(categoriaId && { categoria: { connect: { id: categoriaId } } }),
+        ...(corteId && { corte: { connect: { id: corteId } } }),
       },
     });
   }
@@ -67,17 +66,127 @@ export class ProdutoService {
     return { message: `Produto com ID ${id} removido com sucesso.` };
   }
 
-  async search(query: string): Promise<Produto[]> {
-    if (!query?.trim()) return [];
-    return this.prisma.produto.findMany({
-      where: {
-        OR: [
-          { nome: { contains: query, mode: 'insensitive' } },
-          { descricao: { contains: query, mode: 'insensitive' } },
-          { codigo: { contains: query, mode: 'insensitive' } },
-        ],
+  async search(
+    query: string,
+    page: number,
+    limit: number,
+    orderBy: string,
+    orderDirection: 'asc' | 'desc'
+  ): Promise<{
+    data: {
+      id: number;
+      estoque: number;
+      preco: number;
+      vencimento: Date | null;
+      corte: {
+        id: number;
+        nome: string;
+        especie: {
+          id: number;
+          nome: string;
+        };
+      };
+    }[];
+    total: number;
+    pages: number;
+  }> {
+    const validOrderFields = ['corte', 'especie', 'estoque', 'vencimento'];
+    const sortField = validOrderFields.includes(orderBy) ? orderBy : 'corte';
+
+    const whereCondition: Prisma.ProdutoWhereInput = query?.trim()
+      ? {
+          OR: [
+            {
+              corte: {
+                nome: { contains: query, mode: 'insensitive' },
+              },
+            },
+            {
+              corte: {
+                especieProduto: {
+                  nome: { contains: query, mode: 'insensitive' },
+                },
+              },
+            },
+          ],
+        }
+      : {};
+
+    const orderByConfig: any = {};
+
+    switch (sortField) {
+      case 'corte': {
+        orderByConfig.corte = { nome: orderDirection };
+        break;
+      }
+
+      case 'especie': {
+        orderByConfig.corte = { especieProduto: { nome: orderDirection } };
+        break;
+      }
+
+      case 'estoque': {
+        orderByConfig.estoque = orderDirection;
+        break;
+      }
+
+      case 'vencimento': {
+        orderByConfig.lote = {
+          _min: {
+            vencimento: orderDirection,
+          },
+        };
+        break;
+      }
+
+      default: {
+        orderByConfig.corte = { nome: orderDirection };
+        break;
+      }
+    }
+
+    const [produtos, total] = await Promise.all([
+      this.prisma.produto.findMany({
+        where: whereCondition,
+        include: {
+          corte: {
+            include: {
+              especieProduto: true,
+            },
+          },
+          lote: {
+            orderBy: {
+              vencimento: 'asc',
+            },
+            take: 1,
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: orderByConfig,
+      }),
+      this.prisma.produto.count({ where: whereCondition }),
+    ]);
+
+    const formattedData = produtos.map((produto) => ({
+      id: produto.id,
+      estoque: produto.estoque,
+      preco: produto.precoPadrao,
+      vencimento: produto.lote.length > 0 ? produto.lote[0].vencimento : null,
+      corte: {
+        id: produto.corte.id,
+        nome: produto.corte.nome,
+        especie: {
+          id: produto.corte.especieProduto.id,
+          nome: produto.corte.especieProduto.nome,
+        },
       },
-      orderBy: { nome: 'asc' },
-    });
+    }));
+
+    return {
+      data: formattedData,
+      total,
+      pages: Math.ceil(total / limit),
+    };
   }
 }

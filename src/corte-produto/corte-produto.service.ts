@@ -14,7 +14,7 @@ export class CorteProdutoService {
       nome: createCorteProdutoDto.nome,
       descricao: createCorteProdutoDto.descricao,
       especieProduto: {
-        connect: { id: createCorteProdutoDto.tipoProdutoId },
+        connect: { id: createCorteProdutoDto.especieProdutoId },
       },
     };
 

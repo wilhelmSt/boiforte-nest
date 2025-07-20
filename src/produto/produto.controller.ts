@@ -23,8 +23,14 @@ export class ProdutoController {
 
   @Get('search')
   @ApiOperation({ summary: 'Busca produtos por termo' })
-  search(@Query('q') query: string) {
-    return this.produtoService.search(query);
+  search(
+    @Query('q') query: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('orderBy') orderBy = 'nome',
+    @Query('orderDirection') orderDirection: 'asc' | 'desc' = 'asc'
+  ) {
+    return this.produtoService.search(query, +page, +limit, orderBy, orderDirection);
   }
 
   @Get(':id')

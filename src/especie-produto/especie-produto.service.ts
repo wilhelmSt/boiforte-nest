@@ -4,6 +4,14 @@ import { CreateEspecieProdutoDto, UpdateEspecieProdutoDto } from './especie-prod
 import { Prisma } from '@prisma/client';
 
 type EspecieProduto = Prisma.EspecieProdutoGetPayload<object>;
+type EspecieProdutowithCorte = Prisma.EspecieProdutoGetPayload<{
+  select: {
+    id: true;
+    nome: true;
+    descricao: true;
+    corteProduto: { select: { id: true; nome: true; descricao: true } };
+  };
+}>;
 
 @Injectable()
 export class EspecieProdutoService {
@@ -21,6 +29,24 @@ export class EspecieProdutoService {
   async findAll(): Promise<EspecieProduto[]> {
     return this.prisma.especieProduto.findMany({
       orderBy: { nome: 'asc' },
+    });
+  }
+
+  async findAllWithCorte(): Promise<EspecieProdutowithCorte[]> {
+    return this.prisma.especieProduto.findMany({
+      orderBy: { nome: 'asc' },
+      select: {
+        id: true,
+        nome: true,
+        descricao: true,
+        corteProduto: {
+          select: {
+            id: true,
+            nome: true,
+            descricao: true,
+          },
+        },
+      },
     });
   }
 

@@ -9,4 +9,4 @@ import { CorteProdutoService } from './corte-produto.service';
   providers: [CorteProdutoService],
   exports: [CorteProdutoService],
 })
-export class CategoriaProdutoModule {}
+export class CorteProdutoModule {}

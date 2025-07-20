@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -41,7 +42,7 @@ model Fornecedor {
 
 model CorteProduto {
   id              Int              @id @default(autoincrement())
-  nome            String           @unique
+  nome            String
   descricao       String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
@@ -53,30 +54,29 @@ model CorteProduto {
 }
 
 model EspecieProduto {
-  id              Int       @id @default(autoincrement())
-  nome            String    @unique
+  id              Int               @id @default(autoincrement())
+  nome            String            @unique
   descricao       String?
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   corteProduto    CorteProduto[]
 }
 
 model Produto {
   id                    Int               @id @default(autoincrement())
-  nome                  String
-  codigo                String?           @unique 
+  codigo                String?           @unique
   descricao             String?
   precoPadrao           Float
   estoqueMinimo         Float             @default(0)
   estoque               Float             @default(0)
-  unidadeMedida         String            @default("und")
+  unidadeMedida         String            @default("g")
   promocao              Boolean           @default(false)
   precoPromocional      Float?
   descontoAtacado       Boolean           @default(false)
   precoAtacado          Float?
   quantidadeAtacado     Float?
-  imagem                String?  
+  imagem                String?
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
 
@@ -91,9 +91,8 @@ model Produto {
 model Lote {
   id            Int         @id @default(autoincrement())
   quantidade    Float       @default(1)
-  custoUnitario Float
-  custoTotal    Float
   vencimento    DateTime
+  descricao     String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   

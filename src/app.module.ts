@@ -2,19 +2,13 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+
 import { AuthModule } from './auth/auth.module';
-import { UserService } from './user/user.service';
 import { UserModule } from './user/user.module';
-import { FornecedorController } from './fornecedor/fornecedor.controller';
-import { FornecedorService } from './fornecedor/fornecedor.service';
 import { FornecedorModule } from './fornecedor/fornecedor.module';
 import { EspecieProdutoModule } from './especie-produto/especie-produto.module';
-import { CorteProdutoService } from './corte-produto/corte-produto.service';
-import { CorteProdutoController } from './corte-produto/corte-produto.controller';
-import { CategoriaProdutoModule } from './corte-produto/corte-produto.module';
+import { CorteProdutoModule } from './corte-produto/corte-produto.module';
 import { ProdutoModule } from './produto/produto.module';
-import { LoteService } from './lote/lote.service';
-import { LoteController } from './lote/lote.controller';
 import { LoteModule } from './lote/lote.module';
 import { ClienteModule } from './cliente/cliente.module';
 import { CompraModule } from './compra/compra.module';
@@ -31,7 +25,7 @@ import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra
     UserModule,
     FornecedorModule,
     EspecieProdutoModule,
-    CategoriaProdutoModule,
+    CorteProdutoModule,
     ProdutoModule,
     LoteModule,
     ClienteModule,
@@ -42,7 +36,7 @@ import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra
     ItemCompraModule,
     ItemCompraRecorrenteModule,
   ],
-  controllers: [AppController, FornecedorController, CorteProdutoController, LoteController],
-  providers: [AppService, UserService, FornecedorService, CorteProdutoService, LoteService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

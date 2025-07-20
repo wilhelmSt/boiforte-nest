@@ -16,7 +16,7 @@ export const CreateProdutoSchema = z.object({
   precoAtacado: z.number().optional(),
   quantidadeAtacado: z.number().optional(),
   imagem: z.string().optional(),
-  categoriaId: z.number(),
+  corteId: z.number(),
 });
 
 export const UpdateProdutoSchema = CreateProdutoSchema.partial();
