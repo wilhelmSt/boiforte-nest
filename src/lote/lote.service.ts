@@ -8,12 +8,10 @@ export class LoteService {
   constructor(private prisma: PrismaService) {}
 
   async create(createLoteDto: CreateLoteDto): Promise<Lote> {
-    const { produtoId, fornecedorId, quantidade = 1, custoUnitario, custoTotal, vencimento } = createLoteDto;
+    const { produtoId, fornecedorId, quantidade = 1, vencimento } = createLoteDto;
 
     const data: Prisma.LoteCreateInput = {
       quantidade,
-      custoUnitario,
-      custoTotal,
       vencimento: new Date(vencimento),
       produto: { connect: { id: produtoId } },
       fornecedor: { connect: { id: fornecedorId } },
