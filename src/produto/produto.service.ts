@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProdutoDto, UpdateProdutoDto } from './produto.dto';
 import { Prisma } from '@prisma/client';
@@ -10,13 +10,21 @@ export class ProdutoService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProdutoDto: CreateProdutoDto): Promise<Produto> {
+    const produtoExistente = await this.prisma.produto.findFirst({
+      where: {
+        corteId: createProdutoDto.corteId,
+      },
+    });
+
+    if (produtoExistente) {
+      throw new ConflictException('Já existe um produto cadastrado para este corte');
+    }
+
     const data: Prisma.ProdutoCreateInput = {
       codigo: createProdutoDto?.codigo,
       descricao: createProdutoDto?.descricao,
       precoPadrao: createProdutoDto?.precoPadrao,
       estoqueMinimo: createProdutoDto?.estoqueMinimo,
-      estoque: createProdutoDto?.estoque,
-      unidadeMedida: createProdutoDto?.unidadeMedida,
       promocao: createProdutoDto?.promocao,
       precoPromocional: createProdutoDto?.precoPromocional,
       descontoAtacado: createProdutoDto?.descontoAtacado,
@@ -76,6 +84,7 @@ export class ProdutoService {
     data: {
       id: number;
       estoque: number;
+      estoqueMinimo: number;
       preco: number;
       vencimento: Date | null;
       corte: {
@@ -159,6 +168,9 @@ export class ProdutoService {
               vencimento: 'asc',
             },
             take: 1,
+            select: {
+              vencimento: true,
+            },
           },
         },
         skip: (page - 1) * limit,
@@ -171,8 +183,9 @@ export class ProdutoService {
     const formattedData = produtos.map((produto) => ({
       id: produto.id,
       estoque: produto.estoque,
+      estoqueMinimo: produto.estoqueMinimo,
       preco: produto.precoPadrao,
-      vencimento: produto.lote.length > 0 ? produto.lote[0].vencimento : null,
+      vencimento: produto.lote[0]?.vencimento || null,
       corte: {
         id: produto.corte.id,
         nome: produto.corte.nome,
