@@ -7,6 +7,68 @@ import { Prisma, Lote } from '@prisma/client';
 export class LoteService {
   constructor(private prisma: PrismaService) {}
 
+  async getTopClosestToExpiringLotes(): Promise<Lote[]> {
+    const proximosVencimentos = await this.prisma.lote.findMany({
+      where: {
+        vencimento: {
+          gte: new Date().toISOString(),
+        },
+      },
+      take: 3,
+      orderBy: {
+        vencimento: 'asc',
+      },
+      include: {
+        produto: {
+          include: {
+            corte: {
+              include: {
+                especieProduto: {
+                  select: {
+                    nome: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return proximosVencimentos;
+  }
+
+  async getTopVencidosLotes(): Promise<Lote[]> {
+    const vencidos = await this.prisma.lote.findMany({
+      where: {
+        vencimento: {
+          lt: new Date().toISOString(),
+        },
+      },
+      take: 3,
+      orderBy: {
+        vencimento: 'asc',
+      },
+      include: {
+        produto: {
+          include: {
+            corte: {
+              include: {
+                especieProduto: {
+                  select: {
+                    nome: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return vencidos;
+  }
+
   async findProductsByCorteId(corteId: number): Promise<{ id: number }> {
     const product = await this.prisma.produto.findFirst({
       where: {

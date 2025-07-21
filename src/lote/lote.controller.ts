@@ -21,6 +21,18 @@ export class LoteController {
     return this.loteService.findAll();
   }
 
+  @Get('top-vencidos')
+  @ApiOperation({ summary: 'Lista o top 3 vencidos' })
+  findTopVencidos() {
+    return this.loteService.getTopVencidosLotes();
+  }
+
+  @Get('top-almost-vencidos')
+  @ApiOperation({ summary: 'Lista o top 3 mais perto de vencer' })
+  findTopClosestToExpire() {
+    return this.loteService.getTopClosestToExpiringLotes();
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Obtém um lote pelo ID' })
   @ApiResponse({ status: 404, description: 'Lote não encontrado' })
