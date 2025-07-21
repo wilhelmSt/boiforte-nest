@@ -74,6 +74,66 @@ export class ProdutoService {
     return { message: `Produto com ID ${id} removido com sucesso.` };
   }
 
+  async findProdutosComEstoqueAbaixoMinimo() {
+    return this.prisma.produto.findMany({
+      where: {
+        estoque: {
+          lt: this.prisma.produto.fields.estoqueMinimo,
+          gte: 0,
+        },
+      },
+      take: 3,
+      include: {
+        corte: {
+          select: {
+            id: true,
+            nome: true,
+            especieProduto: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        estoque: 'asc',
+      },
+    });
+  }
+
+  async findProdutosComEstoqueZerado() {
+    return this.prisma.produto.findMany({
+      where: {
+        estoque: 0,
+        estoqueMinimo: {
+          gt: 0,
+        },
+      },
+      take: 3,
+      include: {
+        corte: {
+          select: {
+            id: true,
+            nome: true,
+            especieProduto: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [
+        {
+          estoqueMinimo: 'desc',
+        },
+      ],
+    });
+  }
+
   async search(
     query: string,
     page: number,

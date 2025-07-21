@@ -15,6 +15,18 @@ export class ProdutoController {
     return this.produtoService.create(createProdutoDto);
   }
 
+  @Get('estoque-baixo')
+  @ApiOperation({ summary: 'Lista produto com estoque baixo' })
+  findProdutosComEstoqueAbaixoMinimo() {
+    return this.produtoService.findProdutosComEstoqueAbaixoMinimo();
+  }
+
+  @Get('estoque-zerado')
+  @ApiOperation({ summary: 'Lista produto com estoque zerado' })
+  findProdutosComEstoqueZerado() {
+    return this.produtoService.findProdutosComEstoqueZerado();
+  }
+
   @Get()
   @ApiOperation({ summary: 'Lista todos os produtos' })
   findAll() {
