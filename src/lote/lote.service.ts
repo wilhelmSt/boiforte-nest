@@ -202,10 +202,17 @@ export class LoteService {
 
     const lote = await this.prisma.lote.create({ data });
 
-    // Atualiza o estoque do produto relacionado
     await this.prisma.produto.update({
       where: { id: produtoId },
       data: { estoque: { increment: quantidade } },
+    });
+
+    await this.prisma.fornecedor.update({
+      where: { id: fornecedorId },
+      data: {
+        quantidade_lotes: { increment: 1 },
+        ultima_entrada: new Date(),
+      },
     });
 
     return lote;
