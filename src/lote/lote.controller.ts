@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { LoteService } from './lote.service';
 import { CreateLoteDto, UpdateLoteDto } from './lote.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('lote')
 @Controller('lote')
@@ -19,6 +19,45 @@ export class LoteController {
   @ApiOperation({ summary: 'Lista todos os lotes' })
   findAll() {
     return this.loteService.findAll();
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Busca paginada de lotes por termo' })
+  @ApiQuery({ name: 'q', required: false, description: 'Termo de busca' })
+  @ApiQuery({ name: 'page', required: false, description: 'Página atual', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Itens por página', example: 10 })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Campo para ordenação (vencimento, quantidade, status)',
+    example: 'nome',
+  })
+  @ApiQuery({
+    name: 'orderDirection',
+    required: false,
+    description: 'Direção da ordenação (asc ou desc)',
+    example: 'asc',
+  })
+  async search(
+    @Query('q') query: string,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('orderBy') orderBy = 'nome',
+    @Query('orderDirection') orderDirection: 'asc' | 'desc' = 'asc'
+  ) {
+    return this.loteService.search(query, +page, +limit, orderBy, orderDirection);
+  }
+
+  @Get('top-vencidos')
+  @ApiOperation({ summary: 'Lista o top 3 vencidos' })
+  findTopVencidos() {
+    return this.loteService.getTopVencidosLotes();
+  }
+
+  @Get('top-almost-vencidos')
+  @ApiOperation({ summary: 'Lista o top 3 mais perto de vencer' })
+  findTopClosestToExpire() {
+    return this.loteService.getTopClosestToExpiringLotes();
   }
 
   @Get(':id')

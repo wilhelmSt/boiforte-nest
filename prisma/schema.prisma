@@ -93,6 +93,10 @@ model Lote {
   quantidade    Float       @default(1)
   vencimento    DateTime
   descricao     String?
+
+  custoUnitario Float
+  custoTotal    Float
+
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   
