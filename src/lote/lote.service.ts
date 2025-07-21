@@ -2,16 +2,115 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateLoteDto, UpdateLoteDto } from './lote.dto';
 import { Prisma, Lote } from '@prisma/client';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class LoteService {
   constructor(private prisma: PrismaService) {}
 
+  async search(
+    query: string,
+    page: number,
+    limit: number,
+    orderBy: string,
+    orderDirection: 'asc' | 'desc'
+  ): Promise<{ data: Lote[]; total: number; pages: number }> {
+    const validOrderFields = ['vencimento', 'quantidade', 'status'];
+    const sortField = validOrderFields.includes(orderBy) ? orderBy : 'vencimento';
+
+    const whereCondition: Prisma.LoteWhereInput = query?.trim()
+      ? {
+          OR: [
+            {
+              fornecedor: {
+                nome: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
+              produto: {
+                is: {
+                  corte: {
+                    is: {
+                      nome: {
+                        contains: query,
+                        mode: 'insensitive',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            {
+              produto: {
+                is: {
+                  corte: {
+                    is: {
+                      especieProduto: {
+                        is: {
+                          nome: {
+                            contains: query,
+                            mode: 'insensitive',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        }
+      : {};
+
+    const [lotes, total] = await Promise.all([
+      this.prisma.lote.findMany({
+        where: whereCondition,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          [sortField]: orderDirection,
+        },
+        include: {
+          fornecedor: true,
+          produto: {
+            include: {
+              corte: {
+                include: {
+                  especieProduto: {
+                    select: {
+                      nome: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.lote.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      data: lotes,
+      total,
+      pages: Math.ceil(total / limit),
+    };
+  }
+
   async getTopClosestToExpiringLotes(): Promise<Lote[]> {
+    const hoje = new Date();
+    const doisMesesDepois = dayjs(hoje).add(2, 'month').toDate();
+
     const proximosVencimentos = await this.prisma.lote.findMany({
       where: {
         vencimento: {
-          gte: new Date().toISOString(),
+          gte: hoje,
+          lte: doisMesesDepois,
         },
       },
       take: 3,
