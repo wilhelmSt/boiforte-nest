@@ -67,6 +67,14 @@ export class ProdutoService {
     return { message: `Produto com ID ${id} removido com sucesso.` };
   }
 
+    async findLowStock(): Promise<Produto[]> {
+    return this.prisma.$queryRaw<Produto[]>`
+      SELECT * FROM "Produto"
+      WHERE "estoqueMinimo" > 0 AND "estoque" <= "estoqueMinimo"
+      ORDER BY "nome" ASC
+    `;
+  }
+
   async search(query: string): Promise<Produto[]> {
     if (!query?.trim()) return [];
     return this.prisma.produto.findMany({

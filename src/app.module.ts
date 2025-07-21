@@ -23,7 +23,7 @@ import { LogsModule } from './logs-db/logs.module';
 import { ConfiguracaoModule } from './configuracao/configuracao.module';
 import { ItemCompraModule } from './item-compra/item-compra.module';
 import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra-recorrente.module';
-
+import { ReportModule } from './report/report.module';
 @Module({
   imports: [
     PrismaModule,
@@ -41,6 +41,7 @@ import { ItemCompraRecorrenteModule } from './item-compra-recorrente/item-compra
     ConfiguracaoModule,
     ItemCompraModule,
     ItemCompraRecorrenteModule,
+    ReportModule,
   ],
   controllers: [AppController, FornecedorController, CategoriaProdutoController, LoteController],
   providers: [AppService, UserService, FornecedorService, CategoriaProdutoService, LoteService],
