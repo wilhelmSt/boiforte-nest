@@ -44,8 +44,8 @@ export class ClienteController {
 
   @Get()
   @ApiOperation({ summary: 'Lista todos os clientes' })
-  findAll() {
-    return this.clienteService.findAll();
+  findAll(@Query('q') query: string) {
+    return this.clienteService.findAll(query);
   }
 
   @Get(':id')

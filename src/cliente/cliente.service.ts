@@ -20,8 +20,13 @@ export class ClienteService {
     return this.prisma.cliente.create({ data });
   }
 
-  async findAll(): Promise<Cliente[]> {
+  async findAll(query: string = ''): Promise<Cliente[]> {
+    const whereCondition: Prisma.ClienteWhereInput = query?.trim()
+      ? { nome: { contains: query, mode: 'insensitive' } }
+      : {};
+
     return this.prisma.cliente.findMany({
+      where: whereCondition,
       orderBy: { nome: 'asc' },
     });
   }

@@ -1,29 +1,97 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCompraDto, UpdateCompraDto } from './compra.dto';
-import { Prisma, Compra } from '@prisma/client';
+import { CreateCompraDto } from './compra.dto';
+import { Compra } from '@prisma/client';
+import { CreateItemCompraDto } from 'src/item-compra/item-compra.dto';
 import dayjs from 'dayjs';
 
 @Injectable()
 export class CompraService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createCompraDto: CreateCompraDto): Promise<Compra> {
-    const data: Prisma.CompraCreateInput = {
-      tipoPagamento: createCompraDto.tipoPagamento,
-      condicaoPagamento: createCompraDto.condicaoPagamento,
-      status: createCompraDto.status,
-      valorTotal: createCompraDto.valorTotal,
-      valorTotalFinal: createCompraDto.valorTotalFinal,
-      desconto: createCompraDto.desconto,
-      descontoFinal: createCompraDto.descontoFinal,
-      observacao: createCompraDto.observacao,
-      nfeNumero: createCompraDto.nfeNumero,
-      nfeChave: createCompraDto.nfeChave,
-      cliente: { connect: { id: createCompraDto.clienteId } },
-    };
+  private async validarItensCompra(itens: CreateItemCompraDto[], prisma: any) {
+    const produtos = await prisma.produto.findMany({
+      where: { id: { in: itens.map((i) => i.produtoId) } },
+      select: { id: true, estoque: true },
+    });
 
-    return this.prisma.compra.create({ data });
+    for (const item of itens) {
+      const produto = produtos.find((p) => p.id === item.produtoId);
+
+      if (!produto) {
+        throw new BadRequestException(`Produto com ID ${item.produtoId} não encontrado`);
+      }
+
+      if (produto.estoque < item.quantidade) {
+        throw new BadRequestException(
+          `Estoque insuficiente para ${produto.nome}. Estoque: ${produto.estoque}, solicitado: ${item.quantidade}`
+        );
+      }
+    }
+  }
+
+  async create(createCompraDto: CreateCompraDto) {
+    return this.prisma.$transaction(async (prisma) => {
+      await this.validarItensCompra(createCompraDto.itens, prisma);
+
+      const compra = await prisma.compra.create({
+        data: {
+          tipoPagamento: createCompraDto.tipoPagamento,
+          condicaoPagamento: createCompraDto.condicaoPagamento,
+          status: createCompraDto.status,
+          valorTotal: createCompraDto.valorTotal,
+          valorTotalFinal: createCompraDto.valorTotalFinal,
+          desconto: createCompraDto.desconto,
+          descontoFinal: createCompraDto.descontoFinal,
+          observacao: createCompraDto.observacao,
+          nfeNumero: createCompraDto.nfeNumero,
+          nfeChave: createCompraDto.nfeChave,
+          clienteId: createCompraDto.clienteId,
+          itens: {
+            createMany: {
+              data: createCompraDto.itens.map((item) => ({
+                produtoId: item.produtoId,
+                quantidade: item.quantidade,
+                preco: item.preco,
+                desconto: item.desconto,
+                total: item.total,
+              })),
+            },
+          },
+        },
+        include: {
+          itens: true,
+        },
+      });
+
+      await Promise.all(
+        createCompraDto.itens.map((item) =>
+          prisma.produto.update({
+            where: { id: item.produtoId },
+            data: { estoque: { decrement: item.quantidade } },
+          })
+        )
+      );
+
+      const cliente = await prisma.cliente.findFirst({
+        where: {
+          id: createCompraDto.clienteId,
+        },
+        select: {
+          quantidade_pedidos: true,
+        },
+      });
+
+      await prisma.cliente.update({
+        where: { id: createCompraDto.clienteId },
+        data: {
+          quantidade_pedidos: (cliente?.quantidade_pedidos || 0) + 1,
+          ultimo_pedido: dayjs().toISOString(),
+        },
+      });
+
+      return compra;
+    });
   }
 
   async findAll(): Promise<Compra[]> {
@@ -70,20 +138,6 @@ export class CompraService {
     }
 
     return compra;
-  }
-
-  async update(id: number, updateCompraDto: UpdateCompraDto): Promise<Compra> {
-    await this.findOne(id);
-
-    const data: Prisma.CompraUpdateInput = {
-      ...updateCompraDto,
-      cliente: updateCompraDto.clienteId ? { connect: { id: updateCompraDto.clienteId } } : undefined,
-    };
-
-    return this.prisma.compra.update({
-      where: { id },
-      data,
-    });
   }
 
   async remove(id: number): Promise<{ message: string }> {

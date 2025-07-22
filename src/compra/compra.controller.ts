@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { CompraService } from './compra.service';
-import { CreateCompraDto, UpdateCompraDto } from './compra.dto';
+import { CreateCompraDto } from './compra.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('compra')
@@ -39,13 +39,6 @@ export class CompraController {
   @ApiResponse({ status: 404, description: 'Compra não encontrada' })
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.compraService.findOne(id);
-  }
-
-  @Put(':id')
-  @ApiOperation({ summary: 'Atualiza uma compra' })
-  @ApiResponse({ status: 404, description: 'Compra não encontrada' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateCompraDto: UpdateCompraDto) {
-    return this.compraService.update(id, updateCompraDto);
   }
 
   @Delete(':id')

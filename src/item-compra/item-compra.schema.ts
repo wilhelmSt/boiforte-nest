@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
-export const CreateItemCompraSchema = z.object({
-  quantidade: z.number(),
-  preco: z.number(),
-  desconto: z.number().optional().default(0),
-  total: z.number(),
-  compraId: z.number(),
-  produtoId: z.number(),
+export const ItemCompraSchema = z.object({
+  produtoId: z.number().int().positive(),
+  quantidade: z.number().positive(),
+  preco: z.number().positive(),
+  desconto: z.number().min(0).default(0),
+  total: z.number().positive(),
 });
 
-export const UpdateItemCompraSchema = CreateItemCompraSchema.partial();
+export type ItemCompraSchemaType = z.infer<typeof ItemCompraSchema>;
