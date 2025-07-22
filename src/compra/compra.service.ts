@@ -197,7 +197,22 @@ export class CompraService {
   async findOne(id: number): Promise<Compra> {
     const compra = await this.prisma.compra.findUnique({
       where: { id },
-      include: { cliente: true },
+      include: {
+        cliente: true,
+        itens: {
+          include: {
+            produto: {
+              include: {
+                corte: {
+                  include: {
+                    especieProduto: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!compra) {
