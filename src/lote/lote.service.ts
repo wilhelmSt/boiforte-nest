@@ -228,7 +228,18 @@ export class LoteService {
   async findOne(id: number): Promise<Lote> {
     const lote = await this.prisma.lote.findUnique({
       where: { id },
-      include: { produto: true, fornecedor: true },
+      include: {
+        produto: {
+          include: {
+            corte: {
+              include: {
+                especieProduto: true,
+              },
+            },
+          },
+        },
+        fornecedor: true,
+      },
     });
 
     if (!lote) {
