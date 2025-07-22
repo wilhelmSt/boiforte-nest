@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { CompraService } from './compra.service';
 import { CreateCompraDto, UpdateCompraDto } from './compra.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('compra')
 @Controller('compra')
@@ -19,6 +19,19 @@ export class CompraController {
   @ApiOperation({ summary: 'Lista todas as compras' })
   findAll() {
     return this.compraService.findAll();
+  }
+
+  @Get('count')
+  @ApiOperation({ summary: 'Retorna a quantidade de todas as compras já feitas no sistema' })
+  countAll() {
+    return this.compraService.countAll();
+  }
+
+  @Get('count-day')
+  @ApiOperation({ summary: 'Retorna a quantidade de todas as compras feeitas em um dia específico' })
+  @ApiQuery({ name: 'date', required: true, description: 'Data no formato YYYY-MM-DD' })
+  countAllDay(@Query('date') date: string) {
+    return this.compraService.countAllDay(date);
   }
 
   @Get(':id')

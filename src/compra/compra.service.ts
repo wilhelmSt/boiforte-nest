@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompraDto, UpdateCompraDto } from './compra.dto';
 import { Prisma, Compra } from '@prisma/client';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class CompraService {
@@ -29,6 +30,32 @@ export class CompraService {
     return this.prisma.compra.findMany({
       orderBy: { createdAt: 'desc' },
       include: { cliente: true },
+    });
+  }
+
+  async countAll(): Promise<number> {
+    return this.prisma.compra.count({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async countAllDay(dateStr: string): Promise<number> {
+    const date = dayjs(dateStr);
+
+    if (!date.isValid()) {
+      throw new BadRequestException('Invalid date format. Use YYYY-MM-DD.');
+    }
+
+    const startOfDay = date.startOf('day').toDate();
+    const endOfDay = date.endOf('day').toDate();
+
+    return this.prisma.compra.count({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+      },
     });
   }
 
