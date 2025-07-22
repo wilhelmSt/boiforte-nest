@@ -62,6 +62,7 @@ export class CompraService {
         },
         include: {
           itens: true,
+          cliente: true,
         },
       }),
       this.prisma.compra.count({
