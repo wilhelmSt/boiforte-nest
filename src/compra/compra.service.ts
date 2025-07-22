@@ -1,13 +1,80 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompraDto } from './compra.dto';
-import { Compra } from '@prisma/client';
+import { Compra, Prisma } from '@prisma/client';
 import { CreateItemCompraDto } from 'src/item-compra/item-compra.dto';
 import dayjs from 'dayjs';
 
 @Injectable()
 export class CompraService {
   constructor(private prisma: PrismaService) {}
+
+  async search(
+    query: string,
+    page: number,
+    limit: number,
+    orderBy: string,
+    orderDirection: 'asc' | 'desc'
+  ): Promise<{ data: Compra[]; total: number; pages: number }> {
+    const validOrderFields = ['valorTotal', 'desconto', 'status', 'tipoPagamento', 'nfeNumero', 'nfeChave'];
+    const sortField = validOrderFields.includes(orderBy) ? orderBy : 'valorTotal';
+
+    const whereCondition: Prisma.CompraWhereInput = query?.trim()
+      ? {
+          OR: [
+            {
+              cliente: {
+                nome: {
+                  contains: query,
+                  mode: 'insensitive',
+                },
+              },
+            },
+            {
+              tipoPagamento: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              status: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            {
+              observacao: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+          ],
+        }
+      : {};
+
+    const [lotes, total] = await Promise.all([
+      this.prisma.compra.findMany({
+        where: whereCondition,
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          [sortField]: orderDirection,
+        },
+        include: {
+          itens: true,
+        },
+      }),
+      this.prisma.compra.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      data: lotes,
+      total,
+      pages: Math.ceil(total / limit),
+    };
+  }
 
   private async validarItensCompra(itens: CreateItemCompraDto[], prisma: any) {
     const produtos = await prisma.produto.findMany({
